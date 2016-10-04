@@ -1,0 +1,20 @@
+{
+  "name": "simplePush",
+  "version": "1.0.0",
+  "description": "Simple push notification with Node.js and HTML5",
+  "main": "pushServer.js",
+  "dependencies": {
+    "websocket": "^1.0.23"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "chat",
+    "socket",
+    "websocket"
+  ],
+  "author": "Diego Silveira Mota",
+  "license": "MIT"
+}

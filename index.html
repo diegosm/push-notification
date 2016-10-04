@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple push</title>
+</head>
+<body>
+<script src="https://code.jquery.com/jquery-3.1.1.js" integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA=" crossorigin="anonymous"></script>
+
+<script>
+
+
+    (function(window) {
+
+        var $ = window.jQuery;
+
+        var config = {
+            url : 'ws://localhost:1234',
+            div : 'log',
+            input : 'message',
+            pid : null
+        }
+
+
+        var connection  = null;
+
+        // initialize
+        function init (config) {
+
+            connect(config.url);
+            listener();
+            $("#btSend").click(send);
+        }
+
+
+        // connect to server socket
+        function connect  (url) {
+            connection = new WebSocket(url, 'echo-protocol');
+        }
+
+
+        // listen connection and show data
+        function listener () {
+
+            //console.log(connection);
+            connection.addEventListener("message", function (e) {
+
+                var plain   = e.data;
+                var obj     = JSON.parse(plain);
+                var msgs    = '';
+
+                // pegando o retorno JSON que veio
+                switch ( obj.command ) {
+
+                    // if command equals to ini transaction
+                    case "ini" :
+
+                        if ( obj.response == "ok" ) {
+
+                            // defines pid ( human readable ID )
+                            config.pid = obj.pid;
+                            msgs = obj.response;
+
+                            // prepara o obj pra solicitacao inicial
+                            // prepare object to initial request
+                            var com = { "command" : 'requestIni', "pid" : config.pid};
+                                com = JSON.stringify(com);
+
+                            connection.send(com); // send command to server
+                        }
+
+                    break;
+
+
+
+
+                    // Receive json with Push Notifications
+                    // get the notes object
+                    case "push" :
+
+                        var notes = obj.notes;
+
+                        for ( x=0; x < notes.length; x++) {
+                            msgs += "#" + notes[x].id + " - " + notes[x].title + "<BR>";
+                        }
+
+                    break;
+
+
+
+
+
+
+                    default:
+                        msgs = JSON.stringify(obj);
+
+                }
+
+
+                // div with response
+                $("#" + config.div).html(msgs) ;
+
+            });
+
+        }
+
+
+
+
+        // send method
+        function send ( ) {
+            var msg = $("#" + config.input).val();
+            connection.send(msg);
+            console.log('what you send: ' + msg);
+        }
+
+        // self-initiate
+        $(function() {
+            init(config);
+        });
+
+
+    }(window));
+
+
+
+
+
+
+
+</script>
+
+<h1>simplePush</h1>
+
+<form>
+    <textarea style="width: 500px; height: 80px;" type="text" name="message" id="message">{ "command" :  "ini", "pid": 10 }</textarea>
+    <BR>
+    <input type="button" id="btSend" value="Send command">
+</form>
+
+<hr>
+
+<div id="log"></div>
+
+
+</body>
+
+</html>
